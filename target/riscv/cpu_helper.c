@@ -789,9 +789,12 @@ bool riscv_cpu_tlb_fill(CPUState *cs, vaddr address, int size,
     } else if (probe) {
         return false;
     } else {
-        qemu_log_mask(CPU_LOG_MMU,
+        qemu_log_mask(CPU_LOG_INT,
           "xzl exception ret %d address %p atype %d retaddr %p env pc %p satp %p vsatp %p hgatp %p\n",
-          ret, address, access_type, retaddr, env->pc, env->satp, env->vsatp, env->hgatp);
+          ret, address, access_type, retaddr, env->pc,
+          (hwaddr)get_field(env->satp, SATP_PPN) << PGSHIFT,
+          (hwaddr)get_field(env->vsatp, SATP_PPN) << PGSHIFT,
+          env->hgatp);
         raise_mmu_exception(env, address, access_type, pmp_violation, first_stage_error);
         riscv_raise_exception(env, cs->exception_index, retaddr);
     }
